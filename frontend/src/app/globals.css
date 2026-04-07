@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+:root {
+  /* Primary palette */
+  --navy: #1E293B;
+  --navy-light: #334155;
+  --slate: #475569;
+  --slate-light: #64748B;
+  --blue: #2563EB;
+  --blue-light: #3B82F6;
+  --blue-pale: #DBEAFE;
+  --blue-ghost: #EFF6FF;
+  --orange: #F97316;
+  --orange-light: #FB923C;
+
+  /* Surfaces */
+  --surface: #F8FAFC;
+  --surface-card: #FFFFFF;
+  --surface-hover: #F1F5F9;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+
+  /* Semantic */
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --success-border: #A7F3D0;
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+  --danger-border: #FECACA;
+  --muted: #94A3B8;
+}
+
+@theme inline {
+  --color-navy: var(--navy);
+  --color-navy-light: var(--navy-light);
+  --color-slate-mid: var(--slate);
+  --color-slate-light: var(--slate-light);
+  --color-blue: var(--blue);
+  --color-blue-light: var(--blue-light);
+  --color-blue-pale: var(--blue-pale);
+  --color-blue-ghost: var(--blue-ghost);
+  --color-orange: var(--orange);
+  --color-orange-light: var(--orange-light);
+  --color-surface: var(--surface);
+  --color-surface-card: var(--surface-card);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-border: var(--success-border);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+  --color-muted: var(--muted);
+}
+
+body {
+  background: var(--surface);
+  color: var(--navy);
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum';
+}
+
+.font-display {
+  font-family: 'Calistoga', cursive;
+}
+
+/* Stagger animation */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: fadeSlideUp 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+/* Shimmer loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--border) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* Date input */
+input[type="date"] { color-scheme: light; }
+input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: pointer; }
+
+/* Number input hide spinners */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
