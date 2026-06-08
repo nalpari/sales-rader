@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     target_sales_url: str
     target_login_id: str
     target_login_pw: str
+    frontend_origin: str = "http://localhost:3000"
 
     model_config = {"env_file": ".env"}
 
