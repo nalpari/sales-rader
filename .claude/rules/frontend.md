@@ -8,9 +8,10 @@ globs:
 ## 실행
 ```bash
 cd frontend
-npm run dev      # 개발 서버 (port 3000)
-npm run build    # 프로덕션 빌드
-npm run lint     # ESLint
+pnpm install     # 의존성 설치 (최초 1회)
+pnpm dev         # 개발 서버 (port 3000)
+pnpm build       # 프로덕션 빌드
+pnpm lint        # ESLint
 ```
 
 ## 스택
