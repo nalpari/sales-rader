@@ -72,4 +72,75 @@ jobs:
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
 
-  # Phase 4에서 추가: deploy 잡 (SSH → .env 생성 → 변경된 서비스 태그만 갱신 → compose pull && up -d)
+  deploy:
+    needs: [changes, build-backend, build-frontend]
+    # 빌드가 하나라도 실패/취소되면 배포하지 않음. 변경 없는(skip) 서비스가 있어도,
+    # compose만 바뀐 경우에도 배포는 진행되도록 always() 사용.
+    if: ${{ always() && !cancelled() && !failure() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy compose file to EC2
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: docker-compose.yml
+          target: /opt/sales-rader
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.2.5
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          TARGET_SITE_URL: ${{ secrets.TARGET_SITE_URL }}
+          TARGET_SALES_URL: ${{ secrets.TARGET_SALES_URL }}
+          TARGET_LOGIN_ID: ${{ secrets.TARGET_LOGIN_ID }}
+          TARGET_LOGIN_PW: ${{ secrets.TARGET_LOGIN_PW }}
+          FRONTEND_ORIGIN: ${{ vars.FRONTEND_ORIGIN }}
+          GIT_SHA: ${{ github.sha }}
+          BACKEND_CHANGED: ${{ needs.changes.outputs.backend }}
+          FRONTEND_CHANGED: ${{ needs.changes.outputs.frontend }}
+          DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 30m
+          envs: DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,SUPABASE_URL,SUPABASE_KEY,TARGET_SITE_URL,TARGET_SALES_URL,TARGET_LOGIN_ID,TARGET_LOGIN_PW,FRONTEND_ORIGIN,GIT_SHA,BACKEND_CHANGED,FRONTEND_CHANGED,DISPATCH
+          script: |
+            set -eu
+            cd /opt/sales-rader
+
+            # .env에 KEY=VALUE를 멱등하게 upsert (기존 줄 제거 후 추가)
+            upsert() {
+              key="$1"; val="$2"
+              touch .env
+              grep -v "^${key}=" .env > .env.tmp 2>/dev/null || true
+              echo "${key}=${val}" >> .env.tmp
+              mv .env.tmp .env
+            }
+
+            # 런타임 시크릿 + 레지스트리 네임스페이스 (매 배포 갱신)
+            upsert DOCKERHUB_USERNAME "$DOCKERHUB_USERNAME"
+            upsert SUPABASE_URL "$SUPABASE_URL"
+            upsert SUPABASE_KEY "$SUPABASE_KEY"
+            upsert TARGET_SITE_URL "$TARGET_SITE_URL"
+            upsert TARGET_SALES_URL "$TARGET_SALES_URL"
+            upsert TARGET_LOGIN_ID "$TARGET_LOGIN_ID"
+            upsert TARGET_LOGIN_PW "$TARGET_LOGIN_PW"
+            upsert FRONTEND_ORIGIN "$FRONTEND_ORIGIN"
+
+            # 이번에 빌드된 서비스의 태그만 새 sha로 핀 (나머지는 기존 태그 유지)
+            if [ "$BACKEND_CHANGED" = "true" ] || [ "$DISPATCH" = "true" ]; then upsert BACKEND_TAG "$GIT_SHA"; fi
+            if [ "$FRONTEND_CHANGED" = "true" ] || [ "$DISPATCH" = "true" ]; then upsert FRONTEND_TAG "$GIT_SHA"; fi
+
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker compose pull
+            docker compose up -d
+            docker logout
+            docker image prune -f
