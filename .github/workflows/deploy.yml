@@ -88,7 +88,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: docker-compose.yml
-          target: /opt/sales-rader
+          target: sales-rader
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.2.5
@@ -114,7 +114,7 @@ jobs:
           envs: DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,SUPABASE_URL,SUPABASE_KEY,TARGET_SITE_URL,TARGET_SALES_URL,TARGET_LOGIN_ID,TARGET_LOGIN_PW,FRONTEND_ORIGIN,GIT_SHA,BACKEND_CHANGED,FRONTEND_CHANGED,DISPATCH
           script: |
             set -eu
-            cd /opt/sales-rader
+            cd ~/sales-rader
 
             # .env에 KEY=VALUE를 멱등하게 upsert (기존 줄 제거 후 추가)
             upsert() {
