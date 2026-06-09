@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ${DOCKERHUB_USERNAME:-local}/sales-rader-backend:${BACKEND_TAG:-local}
+    image: ${DOCKERHUB_USERNAME:-local}/sales-rader-backend:${BACKEND_TAG:-latest}
     build: ./backend
     env_file: .env
     ports:
@@ -14,7 +14,7 @@ services:
       start_period: 20s
 
   frontend:
-    image: ${DOCKERHUB_USERNAME:-local}/sales-rader-frontend:${FRONTEND_TAG:-local}
+    image: ${DOCKERHUB_USERNAME:-local}/sales-rader-frontend:${FRONTEND_TAG:-latest}
     build:
       context: ./frontend
       args:
