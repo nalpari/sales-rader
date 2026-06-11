@@ -1,18 +1,26 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.models import ScrapeRequest, ScrapeResponse
+from app.security import verify_scrape_signature
 from app.services.scraper import scrape_card_sales, scrape_sale_dep
 
 router = APIRouter(prefix="/api", tags=["scraper"])
 
 
-@router.post("/scrape", response_model=ScrapeResponse)
+@router.post(
+    "/scrape",
+    response_model=ScrapeResponse,
+    dependencies=[Depends(verify_scrape_signature)],
+)
 async def trigger_scrape(request: ScrapeRequest):
     """카드매출 스크래핑 수동 트리거 (거래단위 → Supabase 저장)"""
     result = await scrape_card_sales(request.start_date, request.end_date)
     return result
 
 
-@router.post("/scrape-aggregate")
+@router.post(
+    "/scrape-aggregate",
+    dependencies=[Depends(verify_scrape_signature)],
+)
 async def trigger_scrape_aggregate(request: ScrapeRequest):
     """카드매출 집계(getSaleDepMonth) 스크래핑 → Bizzle resobj 패스스루.
 
