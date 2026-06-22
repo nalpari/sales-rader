@@ -28,6 +28,9 @@ class CardSale(BaseModel):
 class ScrapeRequest(BaseModel):
     start_date: date
     end_date: date
+    # 사용자별 Bizzle 자격증명. 미지정 시 .env(TARGET_LOGIN_ID/PW)로 폴백.
+    login_id: str | None = None
+    login_pw: str | None = None
 
 
 class ScrapeResponse(BaseModel):
@@ -41,3 +44,12 @@ class SalesSummary(BaseModel):
     acquirer: str
     total_amount: int
     count: int
+
+
+class ImportKeyRequest(BaseModel):
+    year: int
+    month: int
+
+
+class ImportKeyResponse(BaseModel):
+    key: str
