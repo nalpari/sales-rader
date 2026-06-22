@@ -44,3 +44,12 @@ class SalesSummary(BaseModel):
     acquirer: str
     total_amount: int
     count: int
+
+
+class ImportKeyRequest(BaseModel):
+    year: int
+    month: int
+
+
+class ImportKeyResponse(BaseModel):
+    key: str
