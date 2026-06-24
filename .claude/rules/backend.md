@@ -27,7 +27,7 @@ GET  /api/sales/summary   # 매입사별 요약 (start_date, end_date)
 - `TARGET_LOGIN_ID`, `TARGET_LOGIN_PW` — Bizzle 로그인 자격증명
 
 ## 구조
-- `app/main.py` — FastAPI 앱, CORS (localhost:3000 허용)
+- `app/main.py` — FastAPI 앱, CORS (`FRONTEND_ORIGIN` 콤마 구분 다중 origin 허용, 기본 localhost:3000)
 - `app/config.py` — pydantic-settings 기반 환경변수
 - `app/database.py` — Supabase 클라이언트 초기화
 - `app/models.py` — Pydantic 모델 (CardSale, ScrapeRequest/Response, SalesSummary)
