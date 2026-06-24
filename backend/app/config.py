@@ -12,5 +12,10 @@ class Settings(BaseSettings):
 
     model_config = {"env_file": ".env"}
 
+    @property
+    def cors_origins(self) -> list[str]:
+        origins = [o.strip() for o in self.frontend_origin.split(",") if o.strip()]
+        return origins or ["http://localhost:3000"]
+
 
 settings = Settings()
